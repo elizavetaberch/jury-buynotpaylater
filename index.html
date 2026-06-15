@@ -5,82 +5,257 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Buy not, pay later – Jurybewertung</title>
 <style>
-body{font-family:Arial,sans-serif;max-width:1100px;margin:auto;padding:20px;background:#f5f5f5;color:#222}
-.card{background:#fff;padding:20px;border-radius:10px;margin-bottom:15px;box-shadow:0 1px 3px rgba(0,0,0,0.08)}
-table{width:100%;border-collapse:collapse}
-th,td{border:1px solid #ddd;padding:8px}
-th{background:#eee}
-input[type=number]{width:70px}
-input[type=text],input[type=password],input[type=date]{padding:6px;font-size:14px;border:1px solid #bbb;border-radius:4px}
-button{padding:8px 12px;margin:5px 5px 5px 0;cursor:pointer;border:1px solid #888;background:#fff;border-radius:4px;font-size:14px}
-button.primary{background:#222;color:#fff;border-color:#222}
-button.primary:hover{background:#444}
-button:disabled{opacity:.5;cursor:not-allowed}
-.hidden{display:none}
-.invalid{border:2px solid #c00 !important;background:#fff5f5}
-#msg{padding:12px;border-radius:6px;margin-top:10px;font-weight:bold}
-#msg.ok{background:#e6f5e6;color:#1a6e1a;border:1px solid #1a6e1a}
-#msg.err{background:#fbeaea;color:#a01616;border:1px solid #a01616}
-#msg.info{background:#eef2ff;color:#1a3a8a;border:1px solid #1a3a8a}
-.meta-row{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-end;margin-top:10px}
-.meta-row label{font-size:13px;display:flex;flex-direction:column;gap:4px;font-weight:600}
-.meta-row label span.req{color:#c00}
+:root{
+  --bg:#faf7f2;
+  --card:#ffffff;
+  --border:#ebe5d9;
+  --text:#1a1814;
+  --muted:#6c665b;
+  --accent:#c4422c;
+  --ok:#1f6f4a;
+  --ok-soft:#e6f3ec;
+  --err:#a01616;
+  --err-soft:#fbeaea;
+  --info-soft:#eef2ff;
+  --info-border:#3756b0;
+  --radius:14px;
+  --radius-sm:8px;
+  --shadow:0 1px 2px rgba(20,15,5,.04),0 4px 18px rgba(20,15,5,.04);
+  --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Inter, "Helvetica Neue", Arial, sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:var(--font);
+  color:var(--text);
+  background:var(--bg);
+  font-size:15px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+.wrap{max-width:980px;margin:0 auto;padding:32px 24px 80px}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:28px 32px;
+  margin-bottom:20px;
+  box-shadow:var(--shadow);
+}
+@media (max-width:640px){ .card{padding:22px 18px} .wrap{padding:20px 14px 60px} }
+
+/* Header */
+.header{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:start}
+.accentbar{width:4px;background:var(--accent);border-radius:2px;align-self:stretch;min-height:64px}
+h1{font-size:28px;font-weight:700;letter-spacing:-.01em;margin:0 0 4px;line-height:1.2}
+.subtitle{font-size:14px;color:var(--muted);margin:0}
+.author{font-size:13px;color:var(--text);font-weight:600;margin:8px 0 0}
+
+/* Meta */
+.meta-row{
+  display:grid;grid-template-columns:2fr 1fr;gap:18px;
+  margin-top:24px;padding-top:22px;border-top:1px solid var(--border);
+}
+@media (max-width:640px){.meta-row{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.field label .req{color:var(--accent)}
+.field input{
+  font:inherit;padding:11px 14px;
+  border:1px solid var(--border);border-radius:var(--radius-sm);
+  background:#fff;color:var(--text);transition:border-color .12s;
+}
+.field input:focus{outline:none;border-color:var(--accent)}
+.field input.invalid{border-color:var(--err);background:#fff7f7}
+
+/* Legend */
+.legend{
+  margin-top:18px;padding:12px 14px;background:var(--bg);border-radius:var(--radius-sm);
+  font-size:12px;color:var(--muted);
+  display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;
+}
+.legend .legend-label{font-weight:700;color:var(--text);letter-spacing:.04em;text-transform:uppercase;font-size:11px;margin-right:4px}
+.legend b{color:var(--text);font-weight:700}
+
+/* Progress */
+.progress{margin-top:16px;font-size:13px;color:var(--muted)}
+.progress strong{color:var(--text)}
+
+/* Tabs */
+.tabs{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:20px 0 0}
+@media (max-width:640px){.tabs{grid-template-columns:repeat(3,1fr)}}
+.tab{
+  padding:10px 8px;border:1px solid var(--border);background:#fff;color:var(--text);
+  border-radius:var(--radius-sm);font:inherit;font-size:13px;font-weight:500;cursor:pointer;
+  transition:all .12s;display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.tab:hover{border-color:var(--text)}
+.tab.active{background:var(--text);color:#fff;border-color:var(--text)}
+.tab .dot{width:6px;height:6px;border-radius:50%;background:transparent;border:1px solid currentColor;opacity:.4}
+.tab.scored .dot{background:var(--accent);border-color:var(--accent);opacity:1}
+.tab.active.scored .dot{background:#fff;border-color:#fff}
+
+/* Concept */
+.concept-head{display:flex;align-items:baseline;gap:14px;margin-bottom:18px;flex-wrap:wrap}
+.concept-num{
+  font-size:11px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.1em;flex-shrink:0;
+}
+.concept-name{
+  flex:1;min-width:200px;font:inherit;font-size:20px;font-weight:600;
+  padding:6px 0;border:none;border-bottom:1px solid var(--border);
+  background:transparent;color:var(--text);
+}
+.concept-name:focus{outline:none;border-bottom-color:var(--accent)}
+.concept-name::placeholder{color:var(--muted);font-weight:400}
+
+/* Criterion */
+.criterion{
+  display:grid;grid-template-columns:1fr auto;gap:6px 16px;
+  padding:18px 0;border-bottom:1px solid var(--border);
+}
+.criterion:last-of-type{border-bottom:none}
+.crit-title{font-size:15px;font-weight:600}
+.crit-weight{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.04em}
+
+/* Segmented control 0–5 */
+.seg{grid-column:1/-1;display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:8px}
+.seg button{
+  padding:12px 0;border:1px solid var(--border);background:#fff;color:var(--text);
+  border-radius:var(--radius-sm);font:inherit;font-weight:600;font-size:15px;
+  cursor:pointer;transition:all .1s;
+}
+.seg button:hover{border-color:var(--text)}
+.seg button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* Total */
+.total{
+  margin-top:24px;padding:16px 20px;background:var(--bg);border-radius:var(--radius-sm);
+  display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;
+}
+.total-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+.total-val{font-size:28px;font-weight:700;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.total-val .max{font-size:14px;color:var(--muted);font-weight:500;margin-left:4px}
+
+/* Note */
+.note{
+  width:100%;font:inherit;font-size:14px;padding:14px 16px;margin-top:18px;
+  border:1px solid var(--border);border-radius:var(--radius-sm);background:#fff;
+  color:var(--text);resize:vertical;min-height:88px;line-height:1.5;
+}
+.note:focus{outline:none;border-color:var(--accent)}
+
+/* Ranking */
+.section-title{margin:0 0 14px;font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+.rank-row{
+  display:grid;grid-template-columns:44px 1fr 80px;gap:16px;align-items:center;
+  padding:12px 0;border-bottom:1px solid var(--border);
+}
+.rank-row:last-of-type{border-bottom:none}
+.rank-badge{
+  width:34px;height:34px;border-radius:50%;background:var(--bg);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;
+}
+.rank-row.r1 .rank-badge{background:var(--accent);color:#fff;border-color:var(--accent)}
+.rank-row.r2 .rank-badge{background:var(--text);color:#fff;border-color:var(--text)}
+.rank-row.r3 .rank-badge{background:var(--muted);color:#fff;border-color:var(--muted)}
+.rank-name{font-weight:600;font-size:15px}
+.rank-note{font-size:13px;color:var(--muted);margin-top:2px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.rank-score{font-weight:700;font-size:18px;text-align:right;font-variant-numeric:tabular-nums}
+
+/* Actions */
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+button.btn{
+  padding:11px 18px;border:1px solid var(--border);background:#fff;color:var(--text);
+  border-radius:var(--radius-sm);font:inherit;font-size:14px;font-weight:600;
+  cursor:pointer;transition:all .12s;
+}
+button.btn:hover{border-color:var(--text)}
+button.btn.primary{background:var(--text);color:#fff;border-color:var(--text)}
+button.btn.primary:hover{background:#000}
+button.btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* Messages */
+#msg{margin-top:16px;padding:14px 18px;border-radius:var(--radius-sm);font-weight:500;font-size:14px}
+#msg.ok{background:var(--ok-soft);color:var(--ok);border:1px solid var(--ok)}
+#msg.err{background:var(--err-soft);color:var(--err);border:1px solid var(--err)}
+#msg.info{background:var(--info-soft);color:var(--info-border);border:1px solid var(--info-border)}
+
+.hidden{display:none !important}
+.hint{font-size:13px;color:var(--muted);margin:0 0 4px;line-height:1.5}
+
 @media print{
-  button,#nav,#msg{display:none !important}
-  .form.hidden{display:block !important}
   body{background:#fff}
-  .card{box-shadow:none;border:1px solid #ccc;page-break-inside:avoid}
+  .wrap{padding:0}
+  .card{box-shadow:none;border:1px solid #ccc;page-break-inside:avoid;margin-bottom:14px}
+  .tabs,.actions,#msg,.seg button:not(.active){display:none !important}
+  .form.hidden{display:block !important}
+  .seg{display:flex;gap:4px}
 }
 </style>
 </head>
 <body>
 
+<div class="wrap">
+
 <div class="card">
-<h1>Wettbewerbsprojekt „Buy not, pay later"</h1>
-<h2>Studiengang Zeitbasierte Medien</h2>
-<p><strong>Prof. Julia Kühne</strong></p>
-<p>Bewertung von 6 Konzepten (0–5 Punkte je Kriterium)</p>
+  <div class="header">
+    <div class="accentbar"></div>
+    <div>
+      <h1>Wettbewerbsprojekt „Buy not, pay later"</h1>
+      <p class="subtitle">Studiengang Zeitbasierte Medien</p>
+      <p class="author">Prof. Julia Kühne</p>
+    </div>
+  </div>
 
-<div class="meta-row">
-  <label>Name des Jurymitglieds <span class="req">*</span>
-    <input type="text" id="juror" required oninput="autosave();this.classList.remove('invalid')">
-  </label>
-  <label>Datum
-    <input type="date" id="datum" oninput="autosave()">
-  </label>
-</div>
+  <div class="meta-row">
+    <div class="field">
+      <label>Name des Jurymitglieds <span class="req">*</span></label>
+      <input type="text" id="juror" required oninput="autosave();this.classList.remove('invalid')">
+    </div>
+    <div class="field">
+      <label>Datum</label>
+      <input type="date" id="datum" oninput="autosave()">
+    </div>
+  </div>
 
-<div id="nav" style="margin-top:14px"></div>
+  <div class="legend">
+    <span class="legend-label">Skala</span>
+    <span><b>0</b> ungenügend</span>
+    <span><b>1</b> mangelhaft</span>
+    <span><b>2</b> ausreichend</span>
+    <span><b>3</b> befriedigend</span>
+    <span><b>4</b> gut</span>
+    <span><b>5</b> exzellent</span>
+  </div>
+
+  <div class="tabs" id="nav"></div>
+  <div class="progress" id="progress"></div>
 </div>
 
 <div id="forms"></div>
 
 <div class="card">
-<h2>Ranking (Live-Vorschau)</h2>
-<table>
-<thead><tr><th>Rang</th><th>Konzept</th><th>Gesamtpunkte</th><th>Anmerkungen</th></tr></thead>
-<tbody id="ranking"></tbody>
-</table>
+  <p class="section-title">Ranking · Live-Vorschau</p>
+  <div id="ranking"></div>
 </div>
 
 <div class="card">
-<h2>Absenden &amp; Backup</h2>
-<button class="primary" onclick="submitToSheet()">Bewertung absenden</button>
-<button onclick="exportCSV()">CSV exportieren</button>
-<button onclick="window.print()">Drucken / PDF speichern</button>
-<button onclick="clearAll()">Alle Eingaben löschen</button>
-<div id="msg" class="hidden"></div>
-<p style="font-size:12px;color:#666;margin-top:10px">
-Eingaben werden automatisch lokal im Browser gespeichert (localStorage) und sind beim Wiederöffnen dieser Seite verfügbar.
-</p>
+  <div class="actions">
+    <button class="btn" onclick="clearAll()">Alle Eingaben löschen</button>
+    <button class="btn primary" onclick="submitToSheet()">Bewertung absenden</button>
+  </div>
+  <div id="msg" class="hidden"></div>
+</div>
+
 </div>
 
 <script>
-// =================== KONFIGURATION ===================
-// Nach dem Deploy des Apps Scripts hier die /exec-URL eintragen:
+// === KONFIG ===
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyCN6lKjgGv08u75D8hCE0hGpKXkG8gahAQ6OlqQ7eCRYb21JApzYnYtowyCESKLb4x/exec";
 const STORAGE_KEY = "jury_buynotpaylater_v1";
-// =====================================================
 
 const weights = {kreativ:30, ziel:30, machbar:20, medien:15, wirtschaft:5};
 const criteriaOrder = ["kreativ","ziel","machbar","medien","wirtschaft"];
@@ -102,6 +277,18 @@ function score(i){
   return total;
 }
 
+function isScored(i){
+  for(const k of criteriaOrder){
+    const v = document.getElementById(k+i).value;
+    if(v !== "" && v != null) return true;
+  }
+  return false;
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
 function ranking(){
   const arr = [];
   for(let i=1; i<=6; i++){
@@ -112,52 +299,105 @@ function ranking(){
     });
   }
   arr.sort((a,b) => b.s - a.s);
-  document.getElementById('ranking').innerHTML = arr.map((r,idx) =>
-    `<tr><td>${idx+1}</td><td>${escapeHtml(r.n)}</td><td>${r.s.toFixed(2)}</td><td>${escapeHtml(r.a)}</td></tr>`
-  ).join('');
+  document.getElementById('ranking').innerHTML = arr.map((r,idx) => {
+    const rank = idx+1;
+    return `<div class="rank-row r${rank}">
+      <div class="rank-badge">${rank}</div>
+      <div>
+        <div class="rank-name">${escapeHtml(r.n)}</div>
+        ${r.a ? `<div class="rank-note">${escapeHtml(r.a)}</div>` : ''}
+      </div>
+      <div class="rank-score">${r.s.toFixed(2)}</div>
+    </div>`;
+  }).join('');
+
+  let done = 0;
+  for(let i=1; i<=6; i++){
+    const scored = isScored(i);
+    const tab = document.querySelector(`.tab[data-i="${i}"]`);
+    if(tab) tab.classList.toggle('scored', scored);
+    if(scored) done++;
+  }
+  document.getElementById('progress').innerHTML =
+    `<strong>${done} von 6</strong> Konzepten bewertet`;
+
   autosave();
 }
 
-function escapeHtml(s){
-  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-
-// === Formulare aufbauen ===
+// === Build UI ===
 const forms = document.getElementById('forms');
-const nav   = document.getElementById('nav');
+const nav = document.getElementById('nav');
 
 for(let i=1; i<=6; i++){
   nav.insertAdjacentHTML('beforeend',
-    `<button onclick="show(${i})">Konzept ${i}</button>`);
+    `<button type="button" class="tab${i===1?' active':''}" data-i="${i}" onclick="show(${i})">
+       <span class="dot"></span>Konzept ${i}
+     </button>`);
 
-  const rows = criteriaOrder.map(k =>
-    `<tr>
-       <td>${criteriaLabels[k]}</td>
-       <td>${weights[k]}%</td>
-       <td><input type="number" min="0" max="5" step="1" id="${k}${i}" oninput="ranking()"></td>
-     </tr>`).join('');
+  const criteriaRows = criteriaOrder.map(k => `
+    <div class="criterion">
+      <div class="crit-title">${criteriaLabels[k]}</div>
+      <div class="crit-weight">${weights[k]}%</div>
+      <div class="seg" data-target="${k}${i}">
+        ${[0,1,2,3,4,5].map(n =>
+          `<button type="button" data-val="${n}" data-target="${k}${i}">${n}</button>`).join('')}
+      </div>
+      <input type="hidden" id="${k}${i}">
+    </div>`).join('');
 
   forms.insertAdjacentHTML('beforeend', `
-    <div class="card form ${i>1?'hidden':''}" id="c${i}">
-      <h3>Konzept ${i}</h3>
-      <input id="name${i}" placeholder="Name des Konzepts" oninput="ranking()" style="width:60%">
-      <br><br>
-      <table>
-        <tr><th>Kriterium</th><th>Gewichtung</th><th>Punkte (0–5)</th></tr>
-        ${rows}
-      </table>
-      <p><strong>Gesamt: <span id="total${i}">0.00</span> / 5.00</strong></p>
-      <textarea id="note${i}" style="width:100%;height:80px" placeholder="Besondere Stärken / Anmerkungen" oninput="ranking()"></textarea>
+    <div class="card form${i>1?' hidden':''}" id="c${i}">
+      <div class="concept-head">
+        <span class="concept-num">Konzept ${i}</span>
+        <input class="concept-name" id="name${i}" placeholder="Name des Konzepts eingeben …" oninput="ranking()">
+      </div>
+      ${criteriaRows}
+      <div class="total">
+        <span class="total-label">Gesamtpunktzahl · gewichtet</span>
+        <span class="total-val"><span id="total${i}">0.00</span><span class="max"> / 5.00</span></span>
+      </div>
+      <textarea class="note" id="note${i}" placeholder="Besondere Stärken, Anmerkungen …" oninput="ranking()"></textarea>
     </div>`);
 }
+
+// Segmented control: click handler
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.seg button[data-target]');
+  if(!btn) return;
+  const id = btn.dataset.target;
+  const val = btn.dataset.val;
+  const input = document.getElementById(id);
+  if(input.value === val){
+    input.value = '';
+    btn.classList.remove('active');
+  } else {
+    input.value = val;
+    btn.parentElement.querySelectorAll('button').forEach(b =>
+      b.classList.toggle('active', b === btn));
+  }
+  ranking();
+});
 
 function show(i){
   document.querySelectorAll('.form').forEach(x => x.classList.add('hidden'));
   document.getElementById('c'+i).classList.remove('hidden');
+  document.querySelectorAll('.tab').forEach(t =>
+    t.classList.toggle('active', Number(t.dataset.i) === i));
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
-// === Daten sammeln ===
+function paintSegFromHiddenInputs(){
+  for(let i=1; i<=6; i++){
+    for(const k of criteriaOrder){
+      const id = k+i;
+      const val = document.getElementById(id).value;
+      document.querySelectorAll(`.seg[data-target="${id}"] button`)
+        .forEach(b => b.classList.toggle('active', val !== '' && b.dataset.val === val));
+    }
+  }
+}
+
+// === Data ===
 function collectData(){
   const konzepte = [];
   for(let i=1; i<=6; i++){
@@ -181,7 +421,7 @@ function collectData(){
   };
 }
 
-// === localStorage Autosave/Restore ===
+// === localStorage ===
 function autosave(){
   try{
     const snap = {
@@ -198,7 +438,7 @@ function autosave(){
       snap.konzepte.push(o);
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(snap));
-  }catch(e){ /* Storage voll/blockiert -> ignorieren */ }
+  }catch(e){}
 }
 
 function restore(){
@@ -216,6 +456,7 @@ function restore(){
         if(o[k] != null) document.getElementById(k+i).value = o[k];
       }
     });
+    paintSegFromHiddenInputs();
   }catch(e){}
 }
 
@@ -225,18 +466,14 @@ function clearAll(){
   location.reload();
 }
 
-// === Absenden ans Apps Script ===
+// === Submit ===
 async function submitToSheet(){
   const juror = document.getElementById('juror');
   if(!juror.value.trim()){
     juror.classList.add('invalid');
     juror.focus();
+    juror.scrollIntoView({behavior:'smooth', block:'center'});
     showMsg("Bitte den Namen des Jurymitglieds eingeben.", "err");
-    return;
-  }
-
-  if(!SCRIPT_URL || SCRIPT_URL.includes("DEINE_APPS_SCRIPT")){
-    showMsg("SCRIPT_URL ist im HTML noch nicht eingetragen. (Siehe README.md → Schritt 5)", "err");
     return;
   }
 
@@ -246,7 +483,6 @@ async function submitToSheet(){
   showMsg("Sende Bewertung …", "info");
 
   try{
-    // Wichtig: text/plain → keine CORS-Preflight; KEINE custom Header.
     const res = await fetch(SCRIPT_URL, {
       method: "POST",
       headers: {"Content-Type": "text/plain;charset=utf-8"},
@@ -256,12 +492,12 @@ async function submitToSheet(){
     const text = await res.text();
     let parsed;
     try{ parsed = JSON.parse(text); }
-    catch(e){ parsed = {ok:false, error:"Unerwartete Antwort vom Server: " + text.slice(0,200)}; }
+    catch(e){ parsed = {ok:false, error:"Unerwartete Antwort: " + text.slice(0,200)}; }
 
     if(parsed.ok){
-      showMsg("Bewertung erfolgreich gespeichert. Vielen Dank!", "ok");
+      showMsg("✓ Bewertung erfolgreich gespeichert. Vielen Dank!", "ok");
     } else {
-      showMsg("Fehler beim Speichern: " + (parsed.error || "unbekannt") +
+      showMsg("Fehler: " + (parsed.error || "unbekannt") +
               " — bitte CSV exportieren und an die Veranstalter:in schicken.", "err");
     }
   } catch(err){
@@ -280,7 +516,7 @@ function showMsg(text, type){
   m.scrollIntoView({behavior:'smooth', block:'nearest'});
 }
 
-// === CSV-Export (Backup) ===
+// === CSV ===
 function exportCSV(){
   const data = collectData();
   const head = ["Zeitstempel","Jurymitglied","Datum","Konzept-Nr","Konzept-Name",
@@ -297,9 +533,8 @@ function exportCSV(){
     const s = String(c == null ? "" : c);
     return /[",;\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
   }).join(";")).join("\n");
-
   const blob = new Blob(["﻿" + csv], {type:"text/csv;charset=utf-8"});
-  const url  = URL.createObjectURL(blob);
+  const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
   a.download = `Jury_${(data.jurymitglied || 'unbekannt').replace(/\W+/g,'_')}_${data.datum}.csv`;
