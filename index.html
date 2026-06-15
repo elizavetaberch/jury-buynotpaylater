@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Buy not, pay later – Jurybewertung</title>
+<style>
+body{font-family:Arial,sans-serif;max-width:1100px;margin:auto;padding:20px;background:#f5f5f5;color:#222}
+.card{background:#fff;padding:20px;border-radius:10px;margin-bottom:15px;box-shadow:0 1px 3px rgba(0,0,0,0.08)}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #ddd;padding:8px}
+th{background:#eee}
+input[type=number]{width:70px}
+input[type=text],input[type=password],input[type=date]{padding:6px;font-size:14px;border:1px solid #bbb;border-radius:4px}
+button{padding:8px 12px;margin:5px 5px 5px 0;cursor:pointer;border:1px solid #888;background:#fff;border-radius:4px;font-size:14px}
+button.primary{background:#222;color:#fff;border-color:#222}
+button.primary:hover{background:#444}
+button:disabled{opacity:.5;cursor:not-allowed}
+.hidden{display:none}
+.invalid{border:2px solid #c00 !important;background:#fff5f5}
+#msg{padding:12px;border-radius:6px;margin-top:10px;font-weight:bold}
+#msg.ok{background:#e6f5e6;color:#1a6e1a;border:1px solid #1a6e1a}
+#msg.err{background:#fbeaea;color:#a01616;border:1px solid #a01616}
+#msg.info{background:#eef2ff;color:#1a3a8a;border:1px solid #1a3a8a}
+.meta-row{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-end;margin-top:10px}
+.meta-row label{font-size:13px;display:flex;flex-direction:column;gap:4px;font-weight:600}
+.meta-row label span.req{color:#c00}
+@media print{
+  button,#nav,#msg{display:none !important}
+  .form.hidden{display:block !important}
+  body{background:#fff}
+  .card{box-shadow:none;border:1px solid #ccc;page-break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h1>Wettbewerbsprojekt „Buy not, pay later"</h1>
+<h2>Studiengang Zeitbasierte Medien</h2>
+<p><strong>Prof. Julia Kühne</strong></p>
+<p>Bewertung von 6 Konzepten (0–5 Punkte je Kriterium)</p>
+
+<div class="meta-row">
+  <label>Name des Jurymitglieds <span class="req">*</span>
+    <input type="text" id="juror" required oninput="autosave();this.classList.remove('invalid')">
+  </label>
+  <label>Datum
+    <input type="date" id="datum" oninput="autosave()">
+  </label>
+</div>
+
+<div id="nav" style="margin-top:14px"></div>
+</div>
+
+<div id="forms"></div>
+
+<div class="card">
+<h2>Ranking (Live-Vorschau)</h2>
+<table>
+<thead><tr><th>Rang</th><th>Konzept</th><th>Gesamtpunkte</th><th>Anmerkungen</th></tr></thead>
+<tbody id="ranking"></tbody>
+</table>
+</div>
+
+<div class="card">
+<h2>Absenden &amp; Backup</h2>
+<button class="primary" onclick="submitToSheet()">Bewertung absenden</button>
+<button onclick="exportCSV()">CSV exportieren</button>
+<button onclick="window.print()">Drucken / PDF speichern</button>
+<button onclick="clearAll()">Alle Eingaben löschen</button>
+<div id="msg" class="hidden"></div>
+<p style="font-size:12px;color:#666;margin-top:10px">
+Eingaben werden automatisch lokal im Browser gespeichert (localStorage) und sind beim Wiederöffnen dieser Seite verfügbar.
+</p>
+</div>
+
+<script>
+// =================== KONFIGURATION ===================
+// Nach dem Deploy des Apps Scripts hier die /exec-URL eintragen:
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyCN6lKjgGv08u75D8hCE0hGpKXkG8gahAQ6OlqQ7eCRYb21JApzYnYtowyCESKLb4x/exec";
+const STORAGE_KEY = "jury_buynotpaylater_v1";
+// =====================================================
+
+const weights = {kreativ:30, ziel:30, machbar:20, medien:15, wirtschaft:5};
+const criteriaOrder = ["kreativ","ziel","machbar","medien","wirtschaft"];
+const criteriaLabels = {
+  kreativ: "Kreativität & Innovationsgrad",
+  ziel: "Zielgruppenwirkung",
+  machbar: "Machbarkeit",
+  medien: "Medienadäquate Umsetzung",
+  wirtschaft: "Wirtschaftlichkeit"
+};
+
+function score(i){
+  let total = 0;
+  for(const [k,w] of Object.entries(weights)){
+    const v = parseFloat(document.getElementById(k+i).value) || 0;
+    total += v * (w/100);
+  }
+  document.getElementById('total'+i).innerText = total.toFixed(2);
+  return total;
+}
+
+function ranking(){
+  const arr = [];
+  for(let i=1; i<=6; i++){
+    arr.push({
+      n: document.getElementById('name'+i).value || ('Konzept '+i),
+      s: score(i),
+      a: document.getElementById('note'+i).value || ''
+    });
+  }
+  arr.sort((a,b) => b.s - a.s);
+  document.getElementById('ranking').innerHTML = arr.map((r,idx) =>
+    `<tr><td>${idx+1}</td><td>${escapeHtml(r.n)}</td><td>${r.s.toFixed(2)}</td><td>${escapeHtml(r.a)}</td></tr>`
+  ).join('');
+  autosave();
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// === Formulare aufbauen ===
+const forms = document.getElementById('forms');
+const nav   = document.getElementById('nav');
+
+for(let i=1; i<=6; i++){
+  nav.insertAdjacentHTML('beforeend',
+    `<button onclick="show(${i})">Konzept ${i}</button>`);
+
+  const rows = criteriaOrder.map(k =>
+    `<tr>
+       <td>${criteriaLabels[k]}</td>
+       <td>${weights[k]}%</td>
+       <td><input type="number" min="0" max="5" step="1" id="${k}${i}" oninput="ranking()"></td>
+     </tr>`).join('');
+
+  forms.insertAdjacentHTML('beforeend', `
+    <div class="card form ${i>1?'hidden':''}" id="c${i}">
+      <h3>Konzept ${i}</h3>
+      <input id="name${i}" placeholder="Name des Konzepts" oninput="ranking()" style="width:60%">
+      <br><br>
+      <table>
+        <tr><th>Kriterium</th><th>Gewichtung</th><th>Punkte (0–5)</th></tr>
+        ${rows}
+      </table>
+      <p><strong>Gesamt: <span id="total${i}">0.00</span> / 5.00</strong></p>
+      <textarea id="note${i}" style="width:100%;height:80px" placeholder="Besondere Stärken / Anmerkungen" oninput="ranking()"></textarea>
+    </div>`);
+}
+
+function show(i){
+  document.querySelectorAll('.form').forEach(x => x.classList.add('hidden'));
+  document.getElementById('c'+i).classList.remove('hidden');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// === Daten sammeln ===
+function collectData(){
+  const konzepte = [];
+  for(let i=1; i<=6; i++){
+    const punkte = {};
+    for(const k of criteriaOrder){
+      punkte[k] = parseFloat(document.getElementById(k+i).value) || 0;
+    }
+    konzepte.push({
+      nr: i,
+      name: document.getElementById('name'+i).value || ('Konzept '+i),
+      punkte,
+      gesamt: parseFloat(score(i).toFixed(2)),
+      anmerkungen: document.getElementById('note'+i).value || ''
+    });
+  }
+  return {
+    jurymitglied: document.getElementById('juror').value.trim(),
+    datum: document.getElementById('datum').value || new Date().toISOString().slice(0,10),
+    clientZeit: new Date().toISOString(),
+    konzepte
+  };
+}
+
+// === localStorage Autosave/Restore ===
+function autosave(){
+  try{
+    const snap = {
+      juror: document.getElementById('juror').value,
+      datum: document.getElementById('datum').value,
+      konzepte: []
+    };
+    for(let i=1; i<=6; i++){
+      const o = {
+        name: document.getElementById('name'+i).value,
+        note: document.getElementById('note'+i).value
+      };
+      for(const k of criteriaOrder) o[k] = document.getElementById(k+i).value;
+      snap.konzepte.push(o);
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(snap));
+  }catch(e){ /* Storage voll/blockiert -> ignorieren */ }
+}
+
+function restore(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    const s = JSON.parse(raw);
+    if(s.juror) document.getElementById('juror').value = s.juror;
+    if(s.datum) document.getElementById('datum').value = s.datum;
+    (s.konzepte || []).forEach((o,idx) => {
+      const i = idx+1;
+      if(o.name != null) document.getElementById('name'+i).value = o.name;
+      if(o.note != null) document.getElementById('note'+i).value = o.note;
+      for(const k of criteriaOrder){
+        if(o[k] != null) document.getElementById(k+i).value = o[k];
+      }
+    });
+  }catch(e){}
+}
+
+function clearAll(){
+  if(!confirm("Wirklich alle Eingaben dieser Bewertung löschen?")) return;
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+}
+
+// === Absenden ans Apps Script ===
+async function submitToSheet(){
+  const juror = document.getElementById('juror');
+  if(!juror.value.trim()){
+    juror.classList.add('invalid');
+    juror.focus();
+    showMsg("Bitte den Namen des Jurymitglieds eingeben.", "err");
+    return;
+  }
+
+  if(!SCRIPT_URL || SCRIPT_URL.includes("DEINE_APPS_SCRIPT")){
+    showMsg("SCRIPT_URL ist im HTML noch nicht eingetragen. (Siehe README.md → Schritt 5)", "err");
+    return;
+  }
+
+  const data = collectData();
+  const buttons = document.querySelectorAll('button');
+  buttons.forEach(b => b.disabled = true);
+  showMsg("Sende Bewertung …", "info");
+
+  try{
+    // Wichtig: text/plain → keine CORS-Preflight; KEINE custom Header.
+    const res = await fetch(SCRIPT_URL, {
+      method: "POST",
+      headers: {"Content-Type": "text/plain;charset=utf-8"},
+      body: JSON.stringify(data),
+      redirect: "follow"
+    });
+    const text = await res.text();
+    let parsed;
+    try{ parsed = JSON.parse(text); }
+    catch(e){ parsed = {ok:false, error:"Unerwartete Antwort vom Server: " + text.slice(0,200)}; }
+
+    if(parsed.ok){
+      showMsg("Bewertung erfolgreich gespeichert. Vielen Dank!", "ok");
+    } else {
+      showMsg("Fehler beim Speichern: " + (parsed.error || "unbekannt") +
+              " — bitte CSV exportieren und an die Veranstalter:in schicken.", "err");
+    }
+  } catch(err){
+    showMsg("Netzwerkfehler: " + err.message +
+            " — bitte CSV exportieren und an die Veranstalter:in schicken.", "err");
+  } finally {
+    buttons.forEach(b => b.disabled = false);
+  }
+}
+
+function showMsg(text, type){
+  const m = document.getElementById('msg');
+  m.classList.remove('hidden','ok','err','info');
+  m.classList.add(type);
+  m.textContent = text;
+  m.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+// === CSV-Export (Backup) ===
+function exportCSV(){
+  const data = collectData();
+  const head = ["Zeitstempel","Jurymitglied","Datum","Konzept-Nr","Konzept-Name",
+    ...criteriaOrder.map(k => criteriaLabels[k]),
+    "Gesamtpunkte","Anmerkungen"];
+  const rows = [head];
+  const ts = new Date().toISOString();
+  for(const k of data.konzepte){
+    rows.push([ts, data.jurymitglied, data.datum, k.nr, k.name,
+      ...criteriaOrder.map(c => k.punkte[c]),
+      k.gesamt, k.anmerkungen]);
+  }
+  const csv = rows.map(r => r.map(c => {
+    const s = String(c == null ? "" : c);
+    return /[",;\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
+  }).join(";")).join("\n");
+
+  const blob = new Blob(["﻿" + csv], {type:"text/csv;charset=utf-8"});
+  const url  = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Jury_${(data.jurymitglied || 'unbekannt').replace(/\W+/g,'_')}_${data.datum}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+// === Init ===
+restore();
+if(!document.getElementById('datum').value){
+  document.getElementById('datum').value = new Date().toISOString().slice(0,10);
+}
+ranking();
+</script>
+</body>
+</html>
