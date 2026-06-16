@@ -3,47 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Buy not, pay later – Jurybewertung</title>
+<title>Auswertung – Buy not, pay later</title>
 <style>
 :root{
-  --bg:#faf7f2;
-  --card:#ffffff;
-  --border:#ebe5d9;
-  --text:#1a1814;
-  --muted:#6c665b;
-  --accent:#c4422c;
-  --ok:#1f6f4a;
-  --ok-soft:#e6f3ec;
-  --err:#a01616;
-  --err-soft:#fbeaea;
-  --info-soft:#eef2ff;
-  --info-border:#3756b0;
-  --radius:14px;
-  --radius-sm:8px;
+  --bg:#faf7f2; --card:#fff; --border:#ebe5d9; --text:#1a1814; --muted:#6c665b;
+  --accent:#c4422c; --accent-soft:#fae6e0;
+  --ok:#1f6f4a; --ok-soft:#e6f3ec; --err:#a01616; --err-soft:#fbeaea;
+  --radius:14px; --radius-sm:8px;
   --shadow:0 1px 2px rgba(20,15,5,.04),0 4px 18px rgba(20,15,5,.04);
   --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Inter, "Helvetica Neue", Arial, sans-serif;
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
-body{
-  font-family:var(--font);
-  color:var(--text);
-  background:var(--bg);
-  font-size:15px;
-  line-height:1.55;
-  -webkit-font-smoothing:antialiased;
-  text-rendering:optimizeLegibility;
-}
-.wrap{max-width:980px;margin:0 auto;padding:32px 24px 80px}
-
-.card{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  padding:28px 32px;
-  margin-bottom:20px;
-  box-shadow:var(--shadow);
-}
+body{font-family:var(--font);color:var(--text);background:var(--bg);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:32px 24px 80px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:28px 32px;margin-bottom:20px;box-shadow:var(--shadow)}
 @media (max-width:640px){ .card{padding:22px 18px} .wrap{padding:20px 14px 60px} }
 
 /* Header */
@@ -51,505 +25,312 @@ body{
 .accentbar{width:4px;background:var(--accent);border-radius:2px;align-self:stretch;min-height:64px}
 h1{font-size:28px;font-weight:700;letter-spacing:-.01em;margin:0 0 4px;line-height:1.2}
 .subtitle{font-size:14px;color:var(--muted);margin:0}
-.author{font-size:13px;color:var(--text);font-weight:600;margin:8px 0 0}
+.hint{font-size:13px;color:var(--muted);margin:8px 0 0}
 
-/* Meta */
-.meta-row{
-  display:grid;grid-template-columns:2fr 1fr;gap:18px;
-  margin-top:24px;padding-top:22px;border-top:1px solid var(--border);
-}
-@media (max-width:640px){.meta-row{grid-template-columns:1fr}}
-.field{display:flex;flex-direction:column;gap:6px}
-.field label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
-.field label .req{color:var(--accent)}
-.field input{
-  font:inherit;padding:11px 14px;
-  border:1px solid var(--border);border-radius:var(--radius-sm);
-  background:#fff;color:var(--text);transition:border-color .12s;
-}
-.field input:focus{outline:none;border-color:var(--accent)}
-.field input.invalid{border-color:var(--err);background:#fff7f7}
+/* Header actions */
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.btn{padding:10px 16px;border:1px solid var(--border);background:#fff;color:var(--text);border-radius:var(--radius-sm);font:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:all .12s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{border-color:var(--text)}
+.btn.primary{background:var(--text);color:#fff;border-color:var(--text)}
 
-/* Legend */
-.legend{
-  margin-top:18px;padding:12px 14px;background:var(--bg);border-radius:var(--radius-sm);
-  font-size:12px;color:var(--muted);
-  display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;
-}
-.legend .legend-label{font-weight:700;color:var(--text);letter-spacing:.04em;text-transform:uppercase;font-size:11px;margin-right:4px}
-.legend b{color:var(--text);font-weight:700}
+/* Stats overview */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px}
+.stat{padding:18px 20px;background:var(--bg);border-radius:var(--radius-sm)}
+.stat-val{font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums}
+.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:6px;font-weight:700}
 
-/* Progress */
-.progress{margin-top:16px;font-size:13px;color:var(--muted)}
-.progress strong{color:var(--text)}
+/* Section title */
+.section-title{margin:0 0 18px;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
 
-/* Tabs */
-.tabs{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:20px 0 0}
-@media (max-width:640px){.tabs{grid-template-columns:repeat(3,1fr)}}
-.tab{
-  padding:10px 8px;border:1px solid var(--border);background:#fff;color:var(--text);
-  border-radius:var(--radius-sm);font:inherit;font-size:13px;font-weight:500;cursor:pointer;
-  transition:all .12s;display:flex;align-items:center;justify-content:center;gap:6px;
-}
-.tab:hover{border-color:var(--text)}
-.tab.active{background:var(--text);color:#fff;border-color:var(--text)}
-.tab .dot{width:6px;height:6px;border-radius:50%;background:transparent;border:1px solid currentColor;opacity:.4}
-.tab.scored .dot{background:var(--accent);border-color:var(--accent);opacity:1}
-.tab.active.scored .dot{background:#fff;border-color:#fff}
-
-/* Concept */
-.concept-head{display:flex;align-items:baseline;gap:14px;margin-bottom:18px;flex-wrap:wrap}
-.concept-num{
-  font-size:11px;font-weight:700;color:var(--muted);
-  text-transform:uppercase;letter-spacing:.1em;flex-shrink:0;
-}
-.concept-name{
-  flex:1;min-width:200px;font:inherit;font-size:20px;font-weight:600;
-  padding:6px 0;border:none;border-bottom:1px solid var(--border);
-  background:transparent;color:var(--text);
-}
-.concept-name:focus{outline:none;border-bottom-color:var(--accent)}
-.concept-name::placeholder{color:var(--muted);font-weight:400}
-
-/* Criterion */
-.criterion{
-  display:grid;grid-template-columns:1fr auto;gap:6px 16px;
-  padding:18px 0;border-bottom:1px solid var(--border);
-}
-.criterion:last-of-type{border-bottom:none}
-.crit-title{font-size:15px;font-weight:600}
-.crit-weight{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.04em}
-
-/* Segmented control 0–5 */
-.seg{grid-column:1/-1;display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:8px}
-.seg button{
-  padding:12px 0;border:1px solid var(--border);background:#fff;color:var(--text);
-  border-radius:var(--radius-sm);font:inherit;font-weight:600;font-size:15px;
-  cursor:pointer;transition:all .1s;
-}
-.seg button:hover{border-color:var(--text)}
-.seg button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-
-/* Total */
-.total{
-  margin-top:24px;padding:16px 20px;background:var(--bg);border-radius:var(--radius-sm);
-  display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;
-}
-.total-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
-.total-val{font-size:28px;font-weight:700;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
-.total-val .max{font-size:14px;color:var(--muted);font-weight:500;margin-left:4px}
-
-/* Note */
-.note{
-  width:100%;font:inherit;font-size:14px;padding:14px 16px;margin-top:18px;
-  border:1px solid var(--border);border-radius:var(--radius-sm);background:#fff;
-  color:var(--text);resize:vertical;min-height:88px;line-height:1.5;
-}
-.note:focus{outline:none;border-color:var(--accent)}
-
-/* Ranking */
-.section-title{margin:0 0 14px;font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
-.rank-row{
-  display:grid;grid-template-columns:44px 1fr 80px;gap:16px;align-items:center;
-  padding:12px 0;border-bottom:1px solid var(--border);
-}
+/* Ranking rows */
+.rank-row{display:grid;grid-template-columns:56px 1fr 110px;gap:18px;align-items:start;padding:22px 0;border-bottom:1px solid var(--border)}
 .rank-row:last-of-type{border-bottom:none}
-.rank-badge{
-  width:34px;height:34px;border-radius:50%;background:var(--bg);border:1px solid var(--border);
-  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;
-}
+.rank-row.empty{opacity:.55}
+.rank-badge{width:42px;height:42px;border-radius:50%;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px}
 .rank-row.r1 .rank-badge{background:var(--accent);color:#fff;border-color:var(--accent)}
 .rank-row.r2 .rank-badge{background:var(--text);color:#fff;border-color:var(--text)}
 .rank-row.r3 .rank-badge{background:var(--muted);color:#fff;border-color:var(--muted)}
-.rank-name{font-weight:600;font-size:15px}
-.rank-note{font-size:13px;color:var(--muted);margin-top:2px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.rank-score{font-weight:700;font-size:18px;text-align:right;font-variant-numeric:tabular-nums}
+.rank-main{min-width:0}
+.rank-name{font-size:19px;font-weight:700;letter-spacing:-.005em;line-height:1.25;word-break:break-word}
+.rank-meta{font-size:13px;color:var(--muted);margin-top:2px}
+.big-bar{margin-top:12px;height:8px;background:var(--bg);border-radius:4px;overflow:hidden}
+.big-bar-fill{height:100%;background:var(--text);transition:width .3s ease}
+.rank-row.r1 .big-bar-fill{background:var(--accent)}
+.rank-score{text-align:right}
+.rank-score-num{font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums}
+.rank-score-max{font-size:12px;color:var(--muted);font-weight:600;margin-top:2px}
 
-/* Actions */
-.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
-button.btn{
-  padding:11px 18px;border:1px solid var(--border);background:#fff;color:var(--text);
-  border-radius:var(--radius-sm);font:inherit;font-size:14px;font-weight:600;
-  cursor:pointer;transition:all .12s;
-}
-button.btn:hover{border-color:var(--text)}
-button.btn.primary{background:var(--text);color:#fff;border-color:var(--text)}
-button.btn.primary:hover{background:#000}
-button.btn:disabled{opacity:.5;cursor:not-allowed}
+/* Per-criterion details */
+.details{margin-top:14px}
+.details summary{cursor:pointer;font-size:13px;color:var(--muted);font-weight:600;padding:6px 0;list-style:none}
+.details summary::-webkit-details-marker{display:none}
+.details summary::before{content:'▸';display:inline-block;margin-right:6px;transition:transform .15s;font-size:10px}
+.details[open] summary::before{transform:rotate(90deg)}
+.crit-list{margin-top:6px;padding:14px 16px;background:var(--bg);border-radius:var(--radius-sm)}
+.crit-row{display:grid;grid-template-columns:1fr 140px 50px;gap:14px;align-items:center;padding:5px 0;font-size:13px}
+.crit-row-label{color:var(--text)}
+.crit-row-label .muted{color:var(--muted);font-weight:400;margin-left:4px;font-size:12px}
+.crit-row-bar{height:6px;background:#fff;border-radius:3px;border:1px solid var(--border);overflow:hidden}
+.crit-row-fill{height:100%;background:var(--text)}
+.crit-row-val{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
 
-/* Messages */
-#msg{margin-top:16px;padding:14px 18px;border-radius:var(--radius-sm);font-weight:500;font-size:14px}
-#msg.ok{background:var(--ok-soft);color:var(--ok);border:1px solid var(--ok)}
-#msg.err{background:var(--err-soft);color:var(--err);border:1px solid var(--err)}
-#msg.info{background:var(--info-soft);color:var(--info-border);border:1px solid var(--info-border)}
+/* Chips (filter) */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:7px 14px;border:1px solid var(--border);background:#fff;color:var(--text);border-radius:99px;font:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:all .12s}
+.chip:hover{border-color:var(--text)}
+.chip.active{background:var(--text);color:#fff;border-color:var(--text)}
 
-.hidden{display:none !important}
-.hint{font-size:13px;color:var(--muted);margin:0 0 4px;line-height:1.5}
+/* Table */
+.table-wrap{overflow-x:auto;margin:0 -8px;padding:0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:760px}
+th{text-align:left;padding:10px 12px;background:var(--bg);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);cursor:pointer;user-select:none;border-bottom:1px solid var(--border);white-space:nowrap}
+th:hover{color:var(--text)}
+th.sorted{color:var(--text)}
+th .arrow{margin-left:4px;opacity:.6}
+td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+td.strong{font-weight:700}
+tr:hover td{background:#fdfcf9}
+.muted{color:var(--muted)}
 
-@media print{
-  body{background:#fff}
-  .wrap{padding:0}
-  .card{box-shadow:none;border:1px solid #ccc;page-break-inside:avoid;margin-bottom:14px}
-  .tabs,.actions,#msg,.seg button:not(.active){display:none !important}
-  .form.hidden{display:block !important}
-  .seg{display:flex;gap:4px}
-}
+/* States */
+#err{margin-top:12px;padding:12px 16px;border-radius:var(--radius-sm);background:var(--err-soft);color:var(--err);font-weight:500;display:none}
+.skeleton{height:42px;background:linear-gradient(90deg,#f3eee2 0%,#ece5d4 50%,#f3eee2 100%);background-size:200% 100%;animation:shine 1.2s infinite;border-radius:6px;margin:8px 0}
+@keyframes shine{0%{background-position:200% 0}100%{background-position:-200% 0}}
 </style>
 </head>
 <body>
-
 <div class="wrap">
 
 <div class="card">
   <div class="header">
     <div class="accentbar"></div>
     <div>
-      <h1>Wettbewerbsprojekt „Buy not, pay later"</h1>
-      <p class="subtitle">Studiengang Zeitbasierte Medien</p>
-      <p class="author">Prof. Julia Kühne</p>
+      <h1>Auswertung „Buy not, pay later"</h1>
+      <p class="subtitle">Live-Ranking aus den Jury-Bewertungen</p>
+      <p class="hint" id="meta">lädt …</p>
     </div>
   </div>
-
-  <div class="meta-row">
-    <div class="field">
-      <label>Name des Jurymitglieds <span class="req">*</span></label>
-      <input type="text" id="juror" required oninput="autosave();this.classList.remove('invalid')">
-    </div>
-    <div class="field">
-      <label>Datum</label>
-      <input type="date" id="datum" oninput="autosave()">
-    </div>
-  </div>
-
-  <div class="legend">
-    <span class="legend-label">Skala</span>
-    <span><b>0</b> ungenügend</span>
-    <span><b>1</b> mangelhaft</span>
-    <span><b>2</b> ausreichend</span>
-    <span><b>3</b> befriedigend</span>
-    <span><b>4</b> gut</span>
-    <span><b>5</b> exzellent</span>
-  </div>
-
-  <div class="tabs" id="nav"></div>
-  <div class="progress" id="progress"></div>
-</div>
-
-<div id="forms"></div>
-
-<div class="card">
-  <p class="section-title">Ranking · Live-Vorschau</p>
-  <div id="ranking"></div>
-</div>
-
-<div class="card">
   <div class="actions">
-    <button class="btn" onclick="clearAll()">Alle Eingaben löschen</button>
-    <button class="btn primary" onclick="submitToSheet()">Bewertung absenden</button>
+    <button class="btn primary" onclick="loadData()">↻ Aktualisieren</button>
+    <a class="btn" href="../">← Zur Bewertung</a>
   </div>
-  <div id="msg" class="hidden"></div>
+  <div id="err"></div>
+</div>
+
+<div class="card" id="statsCard">
+  <p class="section-title">Übersicht</p>
+  <div id="stats">
+    <div class="skeleton"></div><div class="skeleton" style="width:70%"></div>
+  </div>
+</div>
+
+<div class="card">
+  <p class="section-title">Ranking</p>
+  <div id="ranking">
+    <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+  </div>
+</div>
+
+<div class="card">
+  <p class="section-title">Detail-Tabelle aller Bewertungen</p>
+  <div id="filters" style="margin-bottom:16px"></div>
+  <div class="table-wrap">
+    <table id="tbl">
+      <thead></thead><tbody></tbody>
+    </table>
+  </div>
 </div>
 
 </div>
 
 <script>
-// === KONFIG ===
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJL_8UM6umz9WkFDDaOfF9L8LNL0hQoaULtg-2N3Vad5gPR5WKNozooZM6A97BcUo/exec";
-const STORAGE_KEY = "jury_buynotpaylater_v1";
+const DATA_URL = SCRIPT_URL + "?action=data";
 
-const weights = {kreativ:30, ziel:30, machbar:20, medien:15, wirtschaft:5};
-const criteriaOrder = ["kreativ","ziel","machbar","medien","wirtschaft"];
-const criteriaLabels = {
-  kreativ: "Kreativität & Innovationsgrad",
-  ziel: "Zielgruppenwirkung",
-  machbar: "Machbarkeit",
-  medien: "Medienadäquate Umsetzung",
-  wirtschaft: "Wirtschaftlichkeit"
+const state = {
+  data: null,
+  filter: { juror: "all" },
+  sort: { col: "timestamp", dir: "desc" }
 };
 
-function score(i){
-  let total = 0;
-  for(const [k,w] of Object.entries(weights)){
-    const v = parseFloat(document.getElementById(k+i).value) || 0;
-    total += v * (w/100);
-  }
-  document.getElementById('total'+i).innerText = total.toFixed(2);
-  return total;
+function esc(s){
+  return String(s == null ? "" : s)
+    .replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-function isScored(i){
-  for(const k of criteriaOrder){
-    const v = document.getElementById(k+i).value;
-    if(v !== "" && v != null) return true;
+async function loadData(){
+  document.getElementById('err').style.display = 'none';
+  document.getElementById('meta').textContent = 'Lade Daten …';
+  try{
+    const res = await fetch(DATA_URL, {redirect:"follow"});
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    state.data = data;
+    render();
+  }catch(err){
+    const e = document.getElementById('err');
+    e.textContent = "Fehler beim Laden: " + err.message;
+    e.style.display = 'block';
+    document.getElementById('meta').textContent = '—';
   }
-  return false;
 }
 
-function escapeHtml(s){
-  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function render(){
+  const d = state.data;
+  if(!d) return;
+  const ts = d.generated ? new Date(d.generated) : new Date();
+  document.getElementById('meta').textContent =
+    "Aktualisiert: " + ts.toLocaleString('de-DE', {dateStyle:'medium', timeStyle:'short'});
+  renderStats(d);
+  renderRanking(d);
+  renderFilters(d);
+  renderTable(d);
 }
 
-function ranking(){
-  const arr = [];
-  for(let i=1; i<=6; i++){
-    arr.push({
-      n: document.getElementById('name'+i).value || ('Konzept '+i),
-      s: score(i),
-      a: document.getElementById('note'+i).value || ''
-    });
+function renderStats(d){
+  const totalEntries = d.entries.length;
+  const jurors = d.jurymitglieder.length;
+  const scoredConcepts = d.summary.filter(s => s.count > 0).length;
+  const completeJurors = countCompleteJurors(d);
+  document.getElementById('stats').innerHTML = `
+    <div class="stats">
+      <div class="stat"><div class="stat-val">${jurors}</div><div class="stat-label">Jurymitglieder</div></div>
+      <div class="stat"><div class="stat-val">${completeJurors}</div><div class="stat-label">Komplett bewertet</div></div>
+      <div class="stat"><div class="stat-val">${scoredConcepts}/6</div><div class="stat-label">Konzepte mit Bewertung</div></div>
+      <div class="stat"><div class="stat-val">${totalEntries}</div><div class="stat-label">Bewertungen total</div></div>
+    </div>`;
+}
+
+function countCompleteJurors(d){
+  // Juror, der bei allen 6 Konzepten irgendwas eingetragen hat (anhand Eintragsanzahl)
+  const byJuror = {};
+  for(const e of d.entries){
+    const set = byJuror[e.jurymitglied] = byJuror[e.jurymitglied] || new Set();
+    set.add(e.konzept_nr);
   }
-  arr.sort((a,b) => b.s - a.s);
-  document.getElementById('ranking').innerHTML = arr.map((r,idx) => {
-    const rank = idx+1;
-    return `<div class="rank-row r${rank}">
-      <div class="rank-badge">${rank}</div>
-      <div>
-        <div class="rank-name">${escapeHtml(r.n)}</div>
-        ${r.a ? `<div class="rank-note">${escapeHtml(r.a)}</div>` : ''}
+  return Object.values(byJuror).filter(s => s.size >= 6).length;
+}
+
+function renderRanking(d){
+  const rows = [...d.summary].sort((a,b) => {
+    if(a.count === 0 && b.count === 0) return a.nr - b.nr;
+    if(a.count === 0) return 1;
+    if(b.count === 0) return -1;
+    return b.avgTotal - a.avgTotal;
+  });
+
+  document.getElementById('ranking').innerHTML = rows.map(s => {
+    const rank = s.rank;
+    const rankClass = rank === 1 ? 'r1' : rank === 2 ? 'r2' : rank === 3 ? 'r3' : '';
+    const emptyClass = s.count === 0 ? 'empty' : '';
+    const barW = s.avgTotal != null ? Math.round((s.avgTotal/5)*100) : 0;
+
+    const critBars = d.criteria.map(c => {
+      const v = s.avgs[c.key];
+      const w = v != null ? Math.round((v/5)*100) : 0;
+      return `<div class="crit-row">
+        <div class="crit-row-label">${esc(c.label)} <span class="muted">${c.weight}%</span></div>
+        <div class="crit-row-bar"><div class="crit-row-fill" style="width:${w}%"></div></div>
+        <div class="crit-row-val">${v != null ? v.toFixed(2) : '–'}</div>
+      </div>`;
+    }).join('');
+
+    return `<div class="rank-row ${rankClass} ${emptyClass}">
+      <div class="rank-badge">${rank || '—'}</div>
+      <div class="rank-main">
+        <div class="rank-name">${esc(s.name)}</div>
+        <div class="rank-meta">Konzept ${s.nr} · ${s.count} ${s.count === 1 ? 'Bewertung' : 'Bewertungen'}</div>
+        <div class="big-bar"><div class="big-bar-fill" style="width:${barW}%"></div></div>
+        ${s.count > 0 ? `
+        <details class="details">
+          <summary>Pro Kriterium ansehen</summary>
+          <div class="crit-list">${critBars}</div>
+        </details>` : ''}
       </div>
-      <div class="rank-score">${r.s.toFixed(2)}</div>
+      <div class="rank-score">
+        <div class="rank-score-num">${s.avgTotal != null ? s.avgTotal.toFixed(2) : '–'}</div>
+        <div class="rank-score-max">/ 5.00</div>
+      </div>
     </div>`;
   }).join('');
-
-  let done = 0;
-  for(let i=1; i<=6; i++){
-    const scored = isScored(i);
-    const tab = document.querySelector(`.tab[data-i="${i}"]`);
-    if(tab) tab.classList.toggle('scored', scored);
-    if(scored) done++;
-  }
-  document.getElementById('progress').innerHTML =
-    `<strong>${done} von 6</strong> Konzepten bewertet`;
-
-  autosave();
 }
 
-// === Build UI ===
-const forms = document.getElementById('forms');
-const nav = document.getElementById('nav');
-
-for(let i=1; i<=6; i++){
-  nav.insertAdjacentHTML('beforeend',
-    `<button type="button" class="tab${i===1?' active':''}" data-i="${i}" onclick="show(${i})">
-       <span class="dot"></span>Konzept ${i}
-     </button>`);
-
-  const criteriaRows = criteriaOrder.map(k => `
-    <div class="criterion">
-      <div class="crit-title">${criteriaLabels[k]}</div>
-      <div class="crit-weight">${weights[k]}%</div>
-      <div class="seg" data-target="${k}${i}">
-        ${[0,1,2,3,4,5].map(n =>
-          `<button type="button" data-val="${n}" data-target="${k}${i}">${n}</button>`).join('')}
-      </div>
-      <input type="hidden" id="${k}${i}">
-    </div>`).join('');
-
-  forms.insertAdjacentHTML('beforeend', `
-    <div class="card form${i>1?' hidden':''}" id="c${i}">
-      <div class="concept-head">
-        <span class="concept-num">Konzept ${i}</span>
-        <input class="concept-name" id="name${i}" placeholder="Name des Konzepts eingeben …" oninput="ranking()">
-      </div>
-      ${criteriaRows}
-      <div class="total">
-        <span class="total-label">Gesamtpunktzahl · gewichtet</span>
-        <span class="total-val"><span id="total${i}">0.00</span><span class="max"> / 5.00</span></span>
-      </div>
-      <textarea class="note" id="note${i}" placeholder="Besondere Stärken, Anmerkungen …" oninput="ranking()"></textarea>
-    </div>`);
+function renderFilters(d){
+  const opts = ['all', ...d.jurymitglieder];
+  const chips = opts.map(j => {
+    const active = state.filter.juror === j ? 'active' : '';
+    const label = j === 'all' ? `Alle (${d.entries.length})` : `${j} (${d.entries.filter(e => e.jurymitglied === j).length})`;
+    return `<button class="chip ${active}" onclick="setFilter(${JSON.stringify(j)})">${esc(label)}</button>`;
+  }).join('');
+  document.getElementById('filters').innerHTML = `<div class="chips">${chips}</div>`;
 }
 
-// Segmented control: click handler
-document.addEventListener('click', e => {
-  const btn = e.target.closest('.seg button[data-target]');
-  if(!btn) return;
-  const id = btn.dataset.target;
-  const val = btn.dataset.val;
-  const input = document.getElementById(id);
-  if(input.value === val){
-    input.value = '';
-    btn.classList.remove('active');
+function setFilter(j){
+  state.filter.juror = j;
+  render();
+}
+
+function renderTable(d){
+  const cols = [
+    {key:"timestamp",    label:"Zeit"},
+    {key:"jurymitglied", label:"Juror:in"},
+    {key:"konzept_nr",   label:"Konzept"},
+    ...d.criteria.map(c => ({key:c.key, label:c.label.split(' ')[0], crit:true, full:c.label})),
+    {key:"gesamt",       label:"Gesamt"},
+    {key:"anmerkungen",  label:"Anmerkungen"}
+  ];
+
+  let entries = state.filter.juror === "all"
+    ? d.entries
+    : d.entries.filter(e => e.jurymitglied === state.filter.juror);
+
+  entries = [...entries].sort((a,b) => {
+    const col = state.sort.col;
+    let va, vb;
+    if(d.criteria.find(c => c.key === col)){ va = a.punkte[col]; vb = b.punkte[col]; }
+    else if(col === "konzept_nr"){ va = a.konzept_nr; vb = b.konzept_nr; }
+    else if(col === "gesamt"){ va = a.gesamt; vb = b.gesamt; }
+    else { va = a[col]; vb = b[col]; }
+    if(typeof va === "string") va = va.toLowerCase();
+    if(typeof vb === "string") vb = vb.toLowerCase();
+    if(va < vb) return state.sort.dir === "asc" ? -1 : 1;
+    if(va > vb) return state.sort.dir === "asc" ? 1 : -1;
+    return 0;
+  });
+
+  const tbl = document.getElementById('tbl');
+  tbl.querySelector('thead').innerHTML = `<tr>${cols.map(c => {
+    const sorted = state.sort.col === c.key ? 'sorted' : '';
+    const arrow = state.sort.col === c.key ? `<span class="arrow">${state.sort.dir === "asc" ? '▲' : '▼'}</span>` : '';
+    const title = c.full ? ` title="${esc(c.full)}"` : '';
+    return `<th class="${sorted}" onclick="setSort(${JSON.stringify(c.key)})"${title}>${esc(c.label)}${arrow}</th>`;
+  }).join('')}</tr>`;
+
+  tbl.querySelector('tbody').innerHTML = entries.map(e => {
+    const t = e.timestamp ? new Date(e.timestamp).toLocaleString('de-DE', {dateStyle:'short', timeStyle:'short'}) : '';
+    return `<tr>
+      <td>${esc(t)}</td>
+      <td>${esc(e.jurymitglied)}</td>
+      <td>${esc(e.konzept_name)} <span class="muted">(${e.konzept_nr})</span></td>
+      ${d.criteria.map(c => `<td class="num">${e.punkte[c.key]}</td>`).join('')}
+      <td class="num strong">${(e.gesamt || 0).toFixed(2)}</td>
+      <td>${esc(e.anmerkungen)}</td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="${cols.length}" style="text-align:center;color:var(--muted);padding:24px">Keine Einträge</td></tr>`;
+}
+
+function setSort(col){
+  if(state.sort.col === col){
+    state.sort.dir = state.sort.dir === "asc" ? "desc" : "asc";
   } else {
-    input.value = val;
-    btn.parentElement.querySelectorAll('button').forEach(b =>
-      b.classList.toggle('active', b === btn));
+    state.sort.col = col;
+    state.sort.dir = (col === "gesamt" || col === "timestamp" || col === "konzept_nr") ? "desc" : "asc";
   }
-  ranking();
-});
-
-function show(i){
-  document.querySelectorAll('.form').forEach(x => x.classList.add('hidden'));
-  document.getElementById('c'+i).classList.remove('hidden');
-  document.querySelectorAll('.tab').forEach(t =>
-    t.classList.toggle('active', Number(t.dataset.i) === i));
-  window.scrollTo({top:0, behavior:'smooth'});
+  render();
 }
 
-function paintSegFromHiddenInputs(){
-  for(let i=1; i<=6; i++){
-    for(const k of criteriaOrder){
-      const id = k+i;
-      const val = document.getElementById(id).value;
-      document.querySelectorAll(`.seg[data-target="${id}"] button`)
-        .forEach(b => b.classList.toggle('active', val !== '' && b.dataset.val === val));
-    }
-  }
-}
-
-// === Data ===
-function collectData(){
-  const konzepte = [];
-  for(let i=1; i<=6; i++){
-    const punkte = {};
-    for(const k of criteriaOrder){
-      punkte[k] = parseFloat(document.getElementById(k+i).value) || 0;
-    }
-    konzepte.push({
-      nr: i,
-      name: document.getElementById('name'+i).value || ('Konzept '+i),
-      punkte,
-      gesamt: parseFloat(score(i).toFixed(2)),
-      anmerkungen: document.getElementById('note'+i).value || ''
-    });
-  }
-  return {
-    jurymitglied: document.getElementById('juror').value.trim(),
-    datum: document.getElementById('datum').value || new Date().toISOString().slice(0,10),
-    clientZeit: new Date().toISOString(),
-    konzepte
-  };
-}
-
-// === localStorage ===
-function autosave(){
-  try{
-    const snap = {
-      juror: document.getElementById('juror').value,
-      datum: document.getElementById('datum').value,
-      konzepte: []
-    };
-    for(let i=1; i<=6; i++){
-      const o = {
-        name: document.getElementById('name'+i).value,
-        note: document.getElementById('note'+i).value
-      };
-      for(const k of criteriaOrder) o[k] = document.getElementById(k+i).value;
-      snap.konzepte.push(o);
-    }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(snap));
-  }catch(e){}
-}
-
-function restore(){
-  try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(!raw) return;
-    const s = JSON.parse(raw);
-    if(s.juror) document.getElementById('juror').value = s.juror;
-    if(s.datum) document.getElementById('datum').value = s.datum;
-    (s.konzepte || []).forEach((o,idx) => {
-      const i = idx+1;
-      if(o.name != null) document.getElementById('name'+i).value = o.name;
-      if(o.note != null) document.getElementById('note'+i).value = o.note;
-      for(const k of criteriaOrder){
-        if(o[k] != null) document.getElementById(k+i).value = o[k];
-      }
-    });
-    paintSegFromHiddenInputs();
-  }catch(e){}
-}
-
-function clearAll(){
-  if(!confirm("Wirklich alle Eingaben dieser Bewertung löschen?")) return;
-  localStorage.removeItem(STORAGE_KEY);
-  location.reload();
-}
-
-// === Submit ===
-async function submitToSheet(){
-  const juror = document.getElementById('juror');
-  if(!juror.value.trim()){
-    juror.classList.add('invalid');
-    juror.focus();
-    juror.scrollIntoView({behavior:'smooth', block:'center'});
-    showMsg("Bitte den Namen des Jurymitglieds eingeben.", "err");
-    return;
-  }
-
-  const data = collectData();
-  const buttons = document.querySelectorAll('button');
-  buttons.forEach(b => b.disabled = true);
-  showMsg("Sende Bewertung …", "info");
-
-  try{
-    const res = await fetch(SCRIPT_URL, {
-      method: "POST",
-      headers: {"Content-Type": "text/plain;charset=utf-8"},
-      body: JSON.stringify(data),
-      redirect: "follow"
-    });
-    const text = await res.text();
-    let parsed;
-    try{ parsed = JSON.parse(text); }
-    catch(e){ parsed = {ok:false, error:"Unerwartete Antwort: " + text.slice(0,200)}; }
-
-    if(parsed.ok){
-      showMsg("✓ Bewertung erfolgreich gespeichert. Vielen Dank!", "ok");
-    } else {
-      showMsg("Fehler: " + (parsed.error || "unbekannt") +
-              " — bitte CSV exportieren und an die Veranstalter:in schicken.", "err");
-    }
-  } catch(err){
-    showMsg("Netzwerkfehler: " + err.message +
-            " — bitte CSV exportieren und an die Veranstalter:in schicken.", "err");
-  } finally {
-    buttons.forEach(b => b.disabled = false);
-  }
-}
-
-function showMsg(text, type){
-  const m = document.getElementById('msg');
-  m.classList.remove('hidden','ok','err','info');
-  m.classList.add(type);
-  m.textContent = text;
-  m.scrollIntoView({behavior:'smooth', block:'nearest'});
-}
-
-// === CSV ===
-function exportCSV(){
-  const data = collectData();
-  const head = ["Zeitstempel","Jurymitglied","Datum","Konzept-Nr","Konzept-Name",
-    ...criteriaOrder.map(k => criteriaLabels[k]),
-    "Gesamtpunkte","Anmerkungen"];
-  const rows = [head];
-  const ts = new Date().toISOString();
-  for(const k of data.konzepte){
-    rows.push([ts, data.jurymitglied, data.datum, k.nr, k.name,
-      ...criteriaOrder.map(c => k.punkte[c]),
-      k.gesamt, k.anmerkungen]);
-  }
-  const csv = rows.map(r => r.map(c => {
-    const s = String(c == null ? "" : c);
-    return /[",;\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
-  }).join(";")).join("\n");
-  const blob = new Blob(["﻿" + csv], {type:"text/csv;charset=utf-8"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `Jury_${(data.jurymitglied || 'unbekannt').replace(/\W+/g,'_')}_${data.datum}.csv`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-}
-
-// === Init ===
-restore();
-if(!document.getElementById('datum').value){
-  document.getElementById('datum').value = new Date().toISOString().slice(0,10);
-}
-ranking();
+loadData();
 </script>
 </body>
 </html>
