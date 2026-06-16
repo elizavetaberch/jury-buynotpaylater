@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Auswertung – Buy not, pay later</title>
+<style>
+:root{
+  --bg:#faf7f2; --card:#fff; --border:#ebe5d9; --text:#1a1814; --muted:#6c665b;
+  --accent:#c4422c; --accent-soft:#fae6e0;
+  --ok:#1f6f4a; --ok-soft:#e6f3ec; --err:#a01616; --err-soft:#fbeaea;
+  --radius:14px; --radius-sm:8px;
+  --shadow:0 1px 2px rgba(20,15,5,.04),0 4px 18px rgba(20,15,5,.04);
+  --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Inter, "Helvetica Neue", Arial, sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:var(--font);color:var(--text);background:var(--bg);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:32px 24px 80px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:28px 32px;margin-bottom:20px;box-shadow:var(--shadow)}
+@media (max-width:640px){ .card{padding:22px 18px} .wrap{padding:20px 14px 60px} }
+
+/* Header */
+.header{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:start}
+.accentbar{width:4px;background:var(--accent);border-radius:2px;align-self:stretch;min-height:64px}
+h1{font-size:28px;font-weight:700;letter-spacing:-.01em;margin:0 0 4px;line-height:1.2}
+.subtitle{font-size:14px;color:var(--muted);margin:0}
+.hint{font-size:13px;color:var(--muted);margin:8px 0 0}
+
+/* Header actions */
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.btn{padding:10px 16px;border:1px solid var(--border);background:#fff;color:var(--text);border-radius:var(--radius-sm);font:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:all .12s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{border-color:var(--text)}
+.btn.primary{background:var(--text);color:#fff;border-color:var(--text)}
+
+/* Stats overview */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px}
+.stat{padding:18px 20px;background:var(--bg);border-radius:var(--radius-sm)}
+.stat-val{font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums}
+.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:6px;font-weight:700}
+
+/* Section title */
+.section-title{margin:0 0 18px;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+
+/* Ranking rows */
+.rank-row{display:grid;grid-template-columns:56px 1fr 110px;gap:18px;align-items:start;padding:22px 0;border-bottom:1px solid var(--border)}
+.rank-row:last-of-type{border-bottom:none}
+.rank-row.empty{opacity:.55}
+.rank-badge{width:42px;height:42px;border-radius:50%;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px}
+.rank-row.r1 .rank-badge{background:var(--accent);color:#fff;border-color:var(--accent)}
+.rank-row.r2 .rank-badge{background:var(--text);color:#fff;border-color:var(--text)}
+.rank-row.r3 .rank-badge{background:var(--muted);color:#fff;border-color:var(--muted)}
+.rank-main{min-width:0}
+.rank-name{font-size:19px;font-weight:700;letter-spacing:-.005em;line-height:1.25;word-break:break-word}
+.rank-meta{font-size:13px;color:var(--muted);margin-top:2px}
+.big-bar{margin-top:12px;height:8px;background:var(--bg);border-radius:4px;overflow:hidden}
+.big-bar-fill{height:100%;background:var(--text);transition:width .3s ease}
+.rank-row.r1 .big-bar-fill{background:var(--accent)}
+.rank-score{text-align:right}
+.rank-score-num{font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums}
+.rank-score-max{font-size:12px;color:var(--muted);font-weight:600;margin-top:2px}
+
+/* Per-criterion details */
+.details{margin-top:14px}
+.details summary{cursor:pointer;font-size:13px;color:var(--muted);font-weight:600;padding:6px 0;list-style:none}
+.details summary::-webkit-details-marker{display:none}
+.details summary::before{content:'▸';display:inline-block;margin-right:6px;transition:transform .15s;font-size:10px}
+.details[open] summary::before{transform:rotate(90deg)}
+.crit-list{margin-top:6px;padding:14px 16px;background:var(--bg);border-radius:var(--radius-sm)}
+.crit-row{display:grid;grid-template-columns:1fr 140px 50px;gap:14px;align-items:center;padding:5px 0;font-size:13px}
+.crit-row-label{color:var(--text)}
+.crit-row-label .muted{color:var(--muted);font-weight:400;margin-left:4px;font-size:12px}
+.crit-row-bar{height:6px;background:#fff;border-radius:3px;border:1px solid var(--border);overflow:hidden}
+.crit-row-fill{height:100%;background:var(--text)}
+.crit-row-val{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+
+/* Chips (filter) */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:7px 14px;border:1px solid var(--border);background:#fff;color:var(--text);border-radius:99px;font:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:all .12s}
+.chip:hover{border-color:var(--text)}
+.chip.active{background:var(--text);color:#fff;border-color:var(--text)}
+
+/* Table */
+.table-wrap{overflow-x:auto;margin:0 -8px;padding:0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:760px}
+th{text-align:left;padding:10px 12px;background:var(--bg);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);cursor:pointer;user-select:none;border-bottom:1px solid var(--border);white-space:nowrap}
+th:hover{color:var(--text)}
+th.sorted{color:var(--text)}
+th .arrow{margin-left:4px;opacity:.6}
+td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+td.strong{font-weight:700}
+tr:hover td{background:#fdfcf9}
+.muted{color:var(--muted)}
+
+/* States */
+#err{margin-top:12px;padding:12px 16px;border-radius:var(--radius-sm);background:var(--err-soft);color:var(--err);font-weight:500;display:none}
+.skeleton{height:42px;background:linear-gradient(90deg,#f3eee2 0%,#ece5d4 50%,#f3eee2 100%);background-size:200% 100%;animation:shine 1.2s infinite;border-radius:6px;margin:8px 0}
+@keyframes shine{0%{background-position:200% 0}100%{background-position:-200% 0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="card">
+  <div class="header">
+    <div class="accentbar"></div>
+    <div>
+      <h1>Auswertung „Buy not, pay later"</h1>
+      <p class="subtitle">Live-Ranking aus den Jury-Bewertungen</p>
+      <p class="hint" id="meta">lädt …</p>
+    </div>
+  </div>
+  <div class="actions">
+    <button class="btn primary" onclick="loadData()">↻ Aktualisieren</button>
+    <a class="btn" href="../">← Zur Bewertung</a>
+  </div>
+  <div id="err"></div>
+</div>
+
+<div class="card" id="statsCard">
+  <p class="section-title">Übersicht</p>
+  <div id="stats">
+    <div class="skeleton"></div><div class="skeleton" style="width:70%"></div>
+  </div>
+</div>
+
+<div class="card">
+  <p class="section-title">Ranking</p>
+  <div id="ranking">
+    <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+  </div>
+</div>
+
+<div class="card">
+  <p class="section-title">Detail-Tabelle aller Bewertungen</p>
+  <div id="filters" style="margin-bottom:16px"></div>
+  <div class="table-wrap">
+    <table id="tbl">
+      <thead></thead><tbody></tbody>
+    </table>
+  </div>
+</div>
+
+</div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJL_8UM6umz9WkFDDaOfF9L8LNL0hQoaULtg-2N3Vad5gPR5WKNozooZM6A97BcUo/exec";
+const DATA_URL = SCRIPT_URL + "?action=data";
+
+const state = {
+  data: null,
+  filter: { juror: "all" },
+  sort: { col: "timestamp", dir: "desc" }
+};
+
+function esc(s){
+  return String(s == null ? "" : s)
+    .replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function loadData(){
+  document.getElementById('err').style.display = 'none';
+  document.getElementById('meta').textContent = 'Lade Daten …';
+  try{
+    const res = await fetch(DATA_URL, {redirect:"follow"});
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    state.data = data;
+    render();
+  }catch(err){
+    const e = document.getElementById('err');
+    e.textContent = "Fehler beim Laden: " + err.message;
+    e.style.display = 'block';
+    document.getElementById('meta').textContent = '—';
+  }
+}
+
+function render(){
+  const d = state.data;
+  if(!d) return;
+  const ts = d.generated ? new Date(d.generated) : new Date();
+  document.getElementById('meta').textContent =
+    "Aktualisiert: " + ts.toLocaleString('de-DE', {dateStyle:'medium', timeStyle:'short'});
+  renderStats(d);
+  renderRanking(d);
+  renderFilters(d);
+  renderTable(d);
+}
+
+function renderStats(d){
+  const totalEntries = d.entries.length;
+  const jurors = d.jurymitglieder.length;
+  const scoredConcepts = d.summary.filter(s => s.count > 0).length;
+  const completeJurors = countCompleteJurors(d);
+  document.getElementById('stats').innerHTML = `
+    <div class="stats">
+      <div class="stat"><div class="stat-val">${jurors}</div><div class="stat-label">Jurymitglieder</div></div>
+      <div class="stat"><div class="stat-val">${completeJurors}</div><div class="stat-label">Komplett bewertet</div></div>
+      <div class="stat"><div class="stat-val">${scoredConcepts}/6</div><div class="stat-label">Konzepte mit Bewertung</div></div>
+      <div class="stat"><div class="stat-val">${totalEntries}</div><div class="stat-label">Bewertungen total</div></div>
+    </div>`;
+}
+
+function countCompleteJurors(d){
+  // Juror, der bei allen 6 Konzepten irgendwas eingetragen hat (anhand Eintragsanzahl)
+  const byJuror = {};
+  for(const e of d.entries){
+    const set = byJuror[e.jurymitglied] = byJuror[e.jurymitglied] || new Set();
+    set.add(e.konzept_nr);
+  }
+  return Object.values(byJuror).filter(s => s.size >= 6).length;
+}
+
+function renderRanking(d){
+  const rows = [...d.summary].sort((a,b) => {
+    if(a.count === 0 && b.count === 0) return a.nr - b.nr;
+    if(a.count === 0) return 1;
+    if(b.count === 0) return -1;
+    return b.avgTotal - a.avgTotal;
+  });
+
+  document.getElementById('ranking').innerHTML = rows.map(s => {
+    const rank = s.rank;
+    const rankClass = rank === 1 ? 'r1' : rank === 2 ? 'r2' : rank === 3 ? 'r3' : '';
+    const emptyClass = s.count === 0 ? 'empty' : '';
+    const barW = s.avgTotal != null ? Math.round((s.avgTotal/5)*100) : 0;
+
+    const critBars = d.criteria.map(c => {
+      const v = s.avgs[c.key];
+      const w = v != null ? Math.round((v/5)*100) : 0;
+      return `<div class="crit-row">
+        <div class="crit-row-label">${esc(c.label)} <span class="muted">${c.weight}%</span></div>
+        <div class="crit-row-bar"><div class="crit-row-fill" style="width:${w}%"></div></div>
+        <div class="crit-row-val">${v != null ? v.toFixed(2) : '–'}</div>
+      </div>`;
+    }).join('');
+
+    return `<div class="rank-row ${rankClass} ${emptyClass}">
+      <div class="rank-badge">${rank || '—'}</div>
+      <div class="rank-main">
+        <div class="rank-name">${esc(s.name)}</div>
+        <div class="rank-meta">Konzept ${s.nr} · ${s.count} ${s.count === 1 ? 'Bewertung' : 'Bewertungen'}</div>
+        <div class="big-bar"><div class="big-bar-fill" style="width:${barW}%"></div></div>
+        ${s.count > 0 ? `
+        <details class="details">
+          <summary>Pro Kriterium ansehen</summary>
+          <div class="crit-list">${critBars}</div>
+        </details>` : ''}
+      </div>
+      <div class="rank-score">
+        <div class="rank-score-num">${s.avgTotal != null ? s.avgTotal.toFixed(2) : '–'}</div>
+        <div class="rank-score-max">/ 5.00</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderFilters(d){
+  const opts = ['all', ...d.jurymitglieder];
+  const chips = opts.map(j => {
+    const active = state.filter.juror === j ? 'active' : '';
+    const label = j === 'all' ? `Alle (${d.entries.length})` : `${j} (${d.entries.filter(e => e.jurymitglied === j).length})`;
+    return `<button class="chip ${active}" onclick="setFilter(${JSON.stringify(j)})">${esc(label)}</button>`;
+  }).join('');
+  document.getElementById('filters').innerHTML = `<div class="chips">${chips}</div>`;
+}
+
+function setFilter(j){
+  state.filter.juror = j;
+  render();
+}
+
+function renderTable(d){
+  const cols = [
+    {key:"timestamp",    label:"Zeit"},
+    {key:"jurymitglied", label:"Juror:in"},
+    {key:"konzept_nr",   label:"Konzept"},
+    ...d.criteria.map(c => ({key:c.key, label:c.label.split(' ')[0], crit:true, full:c.label})),
+    {key:"gesamt",       label:"Gesamt"},
+    {key:"anmerkungen",  label:"Anmerkungen"}
+  ];
+
+  let entries = state.filter.juror === "all"
+    ? d.entries
+    : d.entries.filter(e => e.jurymitglied === state.filter.juror);
+
+  entries = [...entries].sort((a,b) => {
+    const col = state.sort.col;
+    let va, vb;
+    if(d.criteria.find(c => c.key === col)){ va = a.punkte[col]; vb = b.punkte[col]; }
+    else if(col === "konzept_nr"){ va = a.konzept_nr; vb = b.konzept_nr; }
+    else if(col === "gesamt"){ va = a.gesamt; vb = b.gesamt; }
+    else { va = a[col]; vb = b[col]; }
+    if(typeof va === "string") va = va.toLowerCase();
+    if(typeof vb === "string") vb = vb.toLowerCase();
+    if(va < vb) return state.sort.dir === "asc" ? -1 : 1;
+    if(va > vb) return state.sort.dir === "asc" ? 1 : -1;
+    return 0;
+  });
+
+  const tbl = document.getElementById('tbl');
+  tbl.querySelector('thead').innerHTML = `<tr>${cols.map(c => {
+    const sorted = state.sort.col === c.key ? 'sorted' : '';
+    const arrow = state.sort.col === c.key ? `<span class="arrow">${state.sort.dir === "asc" ? '▲' : '▼'}</span>` : '';
+    const title = c.full ? ` title="${esc(c.full)}"` : '';
+    return `<th class="${sorted}" onclick="setSort(${JSON.stringify(c.key)})"${title}>${esc(c.label)}${arrow}</th>`;
+  }).join('')}</tr>`;
+
+  tbl.querySelector('tbody').innerHTML = entries.map(e => {
+    const t = e.timestamp ? new Date(e.timestamp).toLocaleString('de-DE', {dateStyle:'short', timeStyle:'short'}) : '';
+    return `<tr>
+      <td>${esc(t)}</td>
+      <td>${esc(e.jurymitglied)}</td>
+      <td>${esc(e.konzept_name)} <span class="muted">(${e.konzept_nr})</span></td>
+      ${d.criteria.map(c => `<td class="num">${e.punkte[c.key]}</td>`).join('')}
+      <td class="num strong">${(e.gesamt || 0).toFixed(2)}</td>
+      <td>${esc(e.anmerkungen)}</td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="${cols.length}" style="text-align:center;color:var(--muted);padding:24px">Keine Einträge</td></tr>`;
+}
+
+function setSort(col){
+  if(state.sort.col === col){
+    state.sort.dir = state.sort.dir === "asc" ? "desc" : "asc";
+  } else {
+    state.sort.col = col;
+    state.sort.dir = (col === "gesamt" || col === "timestamp" || col === "konzept_nr") ? "desc" : "asc";
+  }
+  render();
+}
+
+loadData();
+</script>
+</body>
+</html>
