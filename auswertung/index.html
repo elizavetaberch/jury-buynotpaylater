@@ -13,6 +13,7 @@
   --muted:#666;
   --accent:#c4422c;
   --ok:#1f6f4a;
+  --ok-soft:#e6f3ec;
   --err:#a01616;
   --err-soft:#fbeaea;
   --font: Arial, Helvetica, sans-serif;
@@ -32,6 +33,8 @@ h2{font-size:16px;font-weight:600;color:var(--muted);margin:0 0 0}
 .btn{padding:9px 16px;border:1px solid var(--border);background:#fff;color:var(--text);border-radius:6px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
 .btn:hover{border-color:#999}
 .btn.primary{background:var(--text);color:#fff;border-color:var(--text)}
+.btn.danger{background:#fff;color:var(--err);border-color:var(--err)}
+.btn.danger:hover{background:var(--err);color:#fff}
 
 .section-title{margin:0 0 12px;font-size:15px;font-weight:700}
 
@@ -90,8 +93,10 @@ tr.empty td{color:var(--muted)}
   <div class="actions">
     <button class="btn primary" onclick="loadData()">↻ Aktualisieren</button>
     <a class="btn" href="../">← Zur Bewertung</a>
+    <button class="btn danger" onclick="clearAllRatings()">Alle Bewertungen löschen</button>
   </div>
   <div id="err"></div>
+  <div id="clearMsg" style="display:none;margin-top:12px;padding:12px 16px;border-radius:6px;font-weight:500;font-size:14px"></div>
 </div>
 
 <div class="card">
@@ -308,6 +313,66 @@ function setSort(col){
     state.sort.dir = (col === "gesamt" || col === "timestamp" || col === "konzept_nr") ? "desc" : "asc";
   }
   render();
+}
+
+async function clearAllRatings(){
+  const ok1 = confirm(
+    "Bist du sicher, dass du ALLE Bewertungen aller Jurymitglieder löschen willst?\n\n" +
+    "Diese Aktion kann nicht rückgängig gemacht werden."
+  );
+  if(!ok1) return;
+
+  const typed = prompt(
+    "Zur Sicherheit: bitte LÖSCHEN eingeben (in Großbuchstaben), um endgültig zu bestätigen."
+  );
+  if(typed !== "LÖSCHEN"){
+    showClearMsg("Abgebrochen — es wurde nichts gelöscht.", "info");
+    return;
+  }
+
+  const msg = document.getElementById('clearMsg');
+  showClearMsg("Lösche alle Bewertungen …", "info");
+
+  try{
+    const res = await fetch(SCRIPT_URL, {
+      method: "POST",
+      headers: {"Content-Type": "text/plain;charset=utf-8"},
+      body: JSON.stringify({action: "clear"}),
+      redirect: "follow"
+    });
+    const text = await res.text();
+    let parsed;
+    try{ parsed = JSON.parse(text); }
+    catch(e){ parsed = {ok:false, error:"Unerwartete Antwort: " + text.slice(0,200)}; }
+
+    if(parsed.ok){
+      showClearMsg("✓ Alle Bewertungen wurden gelöscht.", "ok");
+      await loadData();
+    } else {
+      showClearMsg("Fehler: " + (parsed.error || "unbekannt"), "err");
+    }
+  } catch(err){
+    showClearMsg("Netzwerkfehler: " + err.message, "err");
+  }
+}
+
+function showClearMsg(text, type){
+  const m = document.getElementById('clearMsg');
+  m.textContent = text;
+  m.style.display = 'block';
+  if(type === "ok"){
+    m.style.background = "var(--ok-soft, #e6f3ec)";
+    m.style.color = "var(--ok)";
+    m.style.border = "1px solid var(--ok)";
+  } else if(type === "err"){
+    m.style.background = "var(--err-soft)";
+    m.style.color = "var(--err)";
+    m.style.border = "1px solid var(--err)";
+  } else {
+    m.style.background = "#eef2ff";
+    m.style.color = "#3756b0";
+    m.style.border = "1px solid #3756b0";
+  }
 }
 
 loadData();
